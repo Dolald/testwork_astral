@@ -17,8 +17,8 @@ func (t *DocumentService) CreateDocument(userId int, document webСache.Document
 	return t.repo.CreateDocument(userId, document)
 }
 
-func (t *DocumentService) GetAllDocuments(userId int) ([]webСache.Document, error) {
-	return t.repo.GetAllDocuments(userId)
+func (t *DocumentService) GetAllDocuments(userId int, filteredDocuments webСache.Filters) ([]webСache.DocumentsResponse, error) {
+	return t.repo.GetAllDocuments(userId, filteredDocuments)
 }
 
 func (t *DocumentService) GetById(userId, documentId int) (webСache.Document, error) {

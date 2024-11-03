@@ -54,41 +54,46 @@ func (h *Handler) createDocument(c *gin.Context) {
 	c.String(http.StatusOK, configs.SucsessUpload+fileLink, documentId)
 }
 
-type getAllListResponse struct {
-	Data []webСache.Document `json:"data"`
-}
-
 func (h *Handler) getAllDocuments(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	allDocuments, err := h.service.Document.GetAllDocuments(userId)
+	var filteredDocuments webСache.Filters
+
+	err = c.BindJSON(&filteredDocuments)
 	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, getAllListResponse{
-		Data: allDocuments,
-	})
+	allDocuments, err := h.service.Document.GetAllDocuments(userId, filteredDocuments)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, allDocuments)
 }
 
 func (h *Handler) getDocumentById(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	documentId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	document, err := h.service.Document.GetById(userId, documentId)
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -101,13 +106,13 @@ func (h *Handler) deleteDocument(c *gin.Context) {
 		return
 	}
 
-	listId, err := strconv.Atoi(c.Param("id"))
+	documentId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err = h.service.Document.DeleteDocument(userId, listId)
+	err = h.service.Document.DeleteDocument(userId, documentId)
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return

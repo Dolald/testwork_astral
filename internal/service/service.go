@@ -13,7 +13,7 @@ type Authorization interface {
 
 type Document interface {
 	CreateDocument(userId int, document webСache.Document) (int, error)
-	GetAllDocuments(userId int) ([]webСache.Document, error)
+	GetAllDocuments(userId int, filteredDocuments webСache.Filters) ([]webСache.DocumentsResponse, error)
 	GetById(userId, documentId int) (webСache.Document, error)
 	DeleteDocument(userId, documentId int) error
 }

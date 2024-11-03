@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -47,4 +48,40 @@ func getUserId(c *gin.Context) (int, error) {
 	}
 
 	return idInt, nil
+}
+
+func validateLogin(login string) error {
+	if len(login) < 8 {
+		return errors.New("login must be at least 8 characters long")
+	}
+	if matched, _ := regexp.MatchString("^[a-zA-Z0-9]+$", login); !matched {
+		return errors.New("login must contain only letters and digits")
+	}
+	return nil
+}
+
+func validatePassword(pswd string) error {
+	if len(pswd) < 8 {
+		return errors.New("password must be at least 8 characters long")
+	}
+
+	var hasUpper, hasLower, hasDigit, hasSpecial bool
+	for _, char := range pswd {
+		switch {
+		case char >= 'A' && char <= 'Z':
+			hasUpper = true
+		case char >= 'a' && char <= 'z':
+			hasLower = true
+		case char >= '0' && char <= '9':
+			hasDigit = true
+		case !((char >= 'A' && char <= 'Z') || (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9')):
+			hasSpecial = true
+		}
+	}
+
+	if !(hasUpper && hasLower && hasDigit && hasSpecial) {
+		return errors.New("password must contain at least 2 letters in different cases, 1 digit, and 1 special character")
+	}
+
+	return nil
 }

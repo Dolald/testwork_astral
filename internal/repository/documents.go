@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 	webCache "web-cache/internal/domain"
 
 	"github.com/jmoiron/sqlx"
@@ -28,14 +29,36 @@ func (t *DocumentPostgres) CreateDocument(userId int, document webCache.Document
 	return id, nil
 }
 
-func (t *DocumentPostgres) GetAllDocuments(userId int) ([]webCache.Document, error) {
-	// var lists []webCache.Document
+func (t *DocumentPostgres) GetAllDocuments(userId int, allDocuments webCache.Filters) ([]webCache.DocumentsResponse, error) {
+	var args []string
+	var documents []webCache.DocumentsResponse
 
-	// getAllListsQuery := fmt.Sprintf("SELECT tl.id, tl.title, tl.description FROM %s tl JOIN %s ul ON (tl.id = ul.list_id) WHERE ul.user_id = $1", documentsTable, usersTable)
+	if allDocuments.SortByDate {
+		args = append(args, "created_at ASC")
+	}
 
-	// err := t.db.Select(&lists, getAllListsQuery, userId)
+	if allDocuments.SortByName {
+		args = append(args, "filename ASC")
+	}
 
-	return []webCache.Document{}, nil
+	allDocumentsQuery := fmt.Sprintf("SELECT filename, url, created_at FROM %s WHERE user_id = $1", documentsTable)
+
+	if len(args) > 0 {
+		allDocumentsQuery += " ORDER BY " + strings.Join(args, ", ")
+	}
+
+	if allDocuments.LimitDocuments > 0 {
+		allDocumentsQuery += fmt.Sprintf(" LIMIT %d", allDocuments.LimitDocuments)
+	}
+
+	err := t.db.Select(&documents, allDocumentsQuery, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println(documents)
+
+	return documents, nil
 }
 
 func (t *DocumentPostgres) GetById(userId, documentId int) (webCache.Document, error) {
@@ -54,10 +77,22 @@ func (t *DocumentPostgres) GetById(userId, documentId int) (webCache.Document, e
 	return list, nil
 }
 
-func (t *DocumentPostgres) DeleteDocument(userId, listId int) error {
-	// query := fmt.Sprintf("DELETE FROM %s tl USING %s ul WHERE tl.id = ul.list_id AND $1 = ul.user_id AND ul.list_id = $2" /* todoListsTable usersListsTable*/)
+func (t *DocumentPostgres) DeleteDocument(userId, documentId int) error {
+	query := fmt.Sprintf("DELETE FROM %s dt WHERE  $1 = dt.user_id AND dt.id = $2", documentsTable)
 
-	// _, err := t.db.Exec(query, userId, listId)
+	result, err := t.db.Exec(query, userId, documentId)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("Document not found")
+	}
 
 	return nil
 }
