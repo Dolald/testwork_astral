@@ -5,11 +5,11 @@ import (
 	"errors"
 	"net/http/httptest"
 	"testing"
-	webCache "web-cache/internal/domain"
 
-	"web-cache/internal/service"
-	service_mocks "web-cache/internal/service/mocks"
+	service_mocks "github.com/Dolald/testwork_astral/internal/service/mocks"
 
+	"github.com/Dolald/testwork_astral/internal/domain"
+	"github.com/Dolald/testwork_astral/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/assert/v2"
 	"github.com/golang/mock/gomock"
@@ -17,24 +17,24 @@ import (
 
 func TestSignUp(t *testing.T) {
 
-	type mockBehavior func(r *service_mocks.MockAuthorization, user webCache.User)
+	type mockBehavior func(r *service_mocks.MockAuthorization, user domain.User)
 
 	tests := []struct {
 		name                 string
 		inputBody            string
-		inputUser            webCache.User
+		inputUser            domain.User
 		mockBehavior         mockBehavior
 		expectedStatusCode   int
 		expectedResponseBody string
 	}{
 		{
 			name:      "Ok",
-			inputBody: `{"username": "username", "name": "Test Name", "password": "qwerty"}`,
-			inputUser: webCache.User{
+			inputBody: `{"username": "username", "password": "qwerty"}`,
+			inputUser: domain.User{
 				Login:    "username",
 				Password: "qwerty",
 			},
-			mockBehavior: func(r *service_mocks.MockAuthorization, user webCache.User) {
+			mockBehavior: func(r *service_mocks.MockAuthorization, user domain.User) {
 				r.EXPECT().CreateUser(user).Return(1, nil)
 			},
 			expectedStatusCode:   200,
@@ -43,19 +43,19 @@ func TestSignUp(t *testing.T) {
 		{
 			name:                 "Wrong input",
 			inputBody:            `{"username": "username"}`,
-			inputUser:            webCache.User{},
-			mockBehavior:         func(r *service_mocks.MockAuthorization, user webCache.User) {},
+			inputUser:            domain.User{},
+			mockBehavior:         func(r *service_mocks.MockAuthorization, user domain.User) {},
 			expectedStatusCode:   400,
 			expectedResponseBody: `{"message":"invalid input body"}`,
 		},
 		{
 			name:      "Service Error",
-			inputBody: `{"username": "username", "name": "Test Name", "password": "qwerty"}`,
-			inputUser: webCache.User{
+			inputBody: `{"username": "username", "password": "qwerty"}`,
+			inputUser: domain.User{
 				Login:    "username",
 				Password: "qwerty",
 			},
-			mockBehavior: func(r *service_mocks.MockAuthorization, user webCache.User) {
+			mockBehavior: func(r *service_mocks.MockAuthorization, user domain.User) {
 				r.EXPECT().CreateUser(user).Return(0, errors.New("something went wrong"))
 			},
 			expectedStatusCode:   500,

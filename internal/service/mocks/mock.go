@@ -6,7 +6,7 @@ package mock_service
 
 import (
 	gomock "github.com/golang/mock/gomock"
-	webCache "web-cache/internal/domain"
+	"github.com/Dolald/testwork_astral/internal/domain"
 	reflect "reflect"
 )
 
@@ -34,7 +34,7 @@ func (m *MockAuthorization) EXPECT() *MockAuthorizationMockRecorder {
 }
 
 // CreateUser mocks base method
-func (m *MockAuthorization) CreateUser(user webCache.User) (int, error) {
+func (m *MockAuthorization) CreateUser(user domain.User) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", user)
 	ret0, _ := ret[0].(int)
@@ -102,7 +102,7 @@ func (m *MockTodoList) EXPECT() *MockTodoListMockRecorder {
 }
 
 // Create mocks base method
-func (m *MockTodoList) Create(userId int, list webCache.Document) (int, error) {
+func (m *MockTodoList) Create(userId int, list domain.Document) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", userId, list)
 	ret0, _ := ret[0].(int)
@@ -117,10 +117,10 @@ func (mr *MockTodoListMockRecorder) Create(userId, list interface{}) *gomock.Cal
 }
 
 // GetAll mocks base method
-func (m *MockTodoList) GetAll(userId int) ([]webCache.Document, error) {
+func (m *MockTodoList) GetAll(userId int) ([]domain.Document, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAll", userId)
-	ret0, _ := ret[0].([]webCache.Document)
+	ret0, _ := ret[0].([]domain.Document)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -132,10 +132,10 @@ func (mr *MockTodoListMockRecorder) GetAll(userId interface{}) *gomock.Call {
 }
 
 // GetById mocks base method
-func (m *MockTodoList) GetById(userId, listId int) (webCache.Document, error) {
+func (m *MockTodoList) GetById(userId, listId int) (domain.Document, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetById", userId, listId)
-	ret0, _ := ret[0].(webCache.Document)
+	ret0, _ := ret[0].(domain.Document)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

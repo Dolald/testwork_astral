@@ -5,11 +5,11 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	handler "web-cache/internal/handler/http"
-	repository "web-cache/internal/repository"
-	service "web-cache/internal/service"
 
-	webCache "web-cache"
+	handler "github.com/Dolald/testwork_astral/internal/handler/http"
+	"github.com/Dolald/testwork_astral/internal/repository"
+	"github.com/Dolald/testwork_astral/internal/service"
+	"github.com/Dolald/testwork_astral/server"
 
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
@@ -44,7 +44,7 @@ func Run() {
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 
-	server := new(webCache.Server)
+	server := new(server.Server)
 
 	go func() {
 		if err := server.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {

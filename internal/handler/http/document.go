@@ -6,9 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"web-cache/configs"
-	webСache "web-cache/internal/domain"
-
+	"github.com/Dolald/testwork_astral/configs"
+	"github.com/Dolald/testwork_astral/internal/domain"
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,7 +32,7 @@ func (h *Handler) createDocument(c *gin.Context) {
 
 	fileLink := fmt.Sprintf(configs.Url + file.Filename)
 
-	document := webСache.Document{
+	document := domain.Document{
 		User_id:    userId,
 		Filename:   file.Filename,
 		Url:        fileLink,
@@ -61,7 +60,7 @@ func (h *Handler) getAllDocuments(c *gin.Context) {
 		return
 	}
 
-	var filteredDocuments webСache.Filters
+	var filteredDocuments domain.Filters
 
 	err = c.BindJSON(&filteredDocuments)
 	if err != nil {
@@ -91,7 +90,7 @@ func (h *Handler) getDocumentById(c *gin.Context) {
 		return
 	}
 
-	document, err := h.service.Document.GetById(userId, documentId)
+	document, err := h.service.Document.GetDocumentById(userId, documentId)
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return

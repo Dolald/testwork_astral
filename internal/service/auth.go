@@ -5,16 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	webСache "web-cache/internal/domain"
-	"web-cache/internal/repository"
 
+	"github.com/Dolald/testwork_astral/configs"
+	"github.com/Dolald/testwork_astral/internal/repository"
 	"github.com/dgrijalva/jwt-go"
-)
-
-const (
-	salt        = "asdkoawk2jdkji"
-	tokenTTL    = 24 * time.Hour
-	signgingKey = "sa2000dddwli29d2kpld"
 )
 
 type tokenClaims struct {
@@ -30,17 +24,11 @@ func NewAuthService(repo repository.Authorization) *AuthService {
 	return &AuthService{repo: repo}
 }
 
-func (a *AuthService) CreateUser(user webСache.User) (int, error) {
-	user.Password = gereratePasswordHash(user.Password)
-
-	return a.repo.CreateUser(user)
-}
-
 func gereratePasswordHash(password string) string {
 	hash := sha1.New()
 	hash.Write([]byte(password))
 
-	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
+	return fmt.Sprintf("%x", hash.Sum([]byte(configs.Salt)))
 }
 
 func (a *AuthService) GenerateToken(username, password string) (string, error) {
@@ -51,13 +39,13 @@ func (a *AuthService) GenerateToken(username, password string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(tokenTTL).Unix(),
+			ExpiresAt: time.Now().Add(configs.TokenTTL).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
 		userId.Id,
 	})
 
-	return token.SignedString([]byte(signgingKey))
+	return token.SignedString([]byte(configs.SigngingKey))
 }
 
 func (a *AuthService) ParseToken(accessToken string) (int, error) {
@@ -65,7 +53,7 @@ func (a *AuthService) ParseToken(accessToken string) (int, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")
 		}
-		return []byte(signgingKey), nil
+		return []byte(configs.SigngingKey), nil
 	})
 
 	if err != nil {

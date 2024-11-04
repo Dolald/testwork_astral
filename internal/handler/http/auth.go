@@ -2,13 +2,13 @@ package handler
 
 import (
 	"net/http"
-	webCache "web-cache/internal/domain"
 
+	"github.com/Dolald/testwork_astral/internal/domain"
 	"github.com/gin-gonic/gin"
 )
 
 func (h *Handler) signUp(c *gin.Context) {
-	var input webCache.User
+	var input domain.User
 
 	if err := c.BindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
@@ -25,7 +25,7 @@ func (h *Handler) signUp(c *gin.Context) {
 		return
 	}
 
-	id, err := h.service.Authorization.CreateUser(input)
+	id, err := h.service.Users.CreateUser(input)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -37,7 +37,7 @@ func (h *Handler) signUp(c *gin.Context) {
 }
 
 func (h *Handler) signIn(c *gin.Context) {
-	var input webCache.User
+	var input domain.User
 
 	if err := c.BindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())

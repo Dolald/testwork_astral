@@ -1,8 +1,7 @@
 package handler
 
 import (
-	"web-cache/internal/service"
-
+	"github.com/Dolald/testwork_astral/internal/service"
 	"github.com/gin-gonic/gin"
 )
 

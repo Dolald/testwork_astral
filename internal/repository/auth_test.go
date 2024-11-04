@@ -2,8 +2,8 @@ package repository
 
 import (
 	"testing"
-	webCache "web-cache/internal/domain"
 
+	"github.com/Dolald/testwork_astral/internal/domain"
 	"github.com/stretchr/testify/assert"
 	sqlmock "github.com/zhashkevych/go-sqlxmock"
 )
@@ -20,7 +20,7 @@ func TestAuthPostgres_CreateUser(t *testing.T) {
 	tests := []struct {
 		name    string
 		mock    func()
-		input   webCache.User
+		input   domain.User
 		want    int
 		wantErr bool
 	}{
@@ -30,7 +30,7 @@ func TestAuthPostgres_CreateUser(t *testing.T) {
 				rows := sqlmock.NewRows([]string{"id"}).AddRow(1)
 				mock.ExpectQuery("INSERT INTO users").WithArgs("test", "test", "test").WillReturnRows(rows)
 			},
-			input: webCache.User{
+			input: domain.User{
 
 				Login:    "test",
 				Password: "test",
@@ -43,7 +43,7 @@ func TestAuthPostgres_CreateUser(t *testing.T) {
 				rows := sqlmock.NewRows([]string{"id"})
 				mock.ExpectQuery("INSERT INTO users").WithArgs("test", "test", "").WillReturnRows(rows)
 			},
-			input: webCache.User{
+			input: domain.User{
 
 				Login:    "test",
 				Password: "",
@@ -85,7 +85,7 @@ func testAuthPostgres_getUser(t *testing.T) {
 		name    string
 		mock    func()
 		input   args
-		want    webCache.User
+		want    domain.User
 		wantErr bool
 	}{
 		{
@@ -95,7 +95,7 @@ func testAuthPostgres_getUser(t *testing.T) {
 				mock.ExpectQuery("SELECT (.+) FROM users").WithArgs("test", "password").WillReturnRows(rows)
 			},
 			input: args{"test", "test"},
-			want:  webCache.User{1, "test", "test"},
+			want:  domain.User{1, "test", "test"},
 		},
 		{
 			name: "Now found",

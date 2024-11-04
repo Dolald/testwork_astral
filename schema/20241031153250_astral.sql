@@ -3,9 +3,9 @@
 
 CREATE TABLE users
 (
-    id serial not null unique,
-    login varchar(255) not null,
-    password_hash varchar(255) not null
+    id SERIAL NOT NULL,
+    login VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE documents

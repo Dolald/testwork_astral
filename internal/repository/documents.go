@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
-	webCache "web-cache/internal/domain"
 
+	"github.com/Dolald/testwork_astral/internal/domain"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -17,9 +17,9 @@ func NewDocumentsPostgres(db *sqlx.DB) *DocumentPostgres {
 	return &DocumentPostgres{db: db}
 }
 
-func (t *DocumentPostgres) CreateDocument(userId int, document webCache.Document) (int, error) {
+func (t *DocumentPostgres) CreateDocument(userId int, document domain.Document) (int, error) {
 
-	createListQuery := fmt.Sprintf("INSERT INTO %s (user_id, filename, url) VALUES ($1, $2, $3) RETURNING id", documentsTable)
+	createListQuery := "INSERT INTO documents (user_id, filename, url) VALUES ($1, $2, $3) RETURNING id"
 	row := t.db.QueryRow(createListQuery, userId, document.Filename, document.Url)
 	var id int
 	if err := row.Scan(&id); err != nil {
@@ -29,9 +29,9 @@ func (t *DocumentPostgres) CreateDocument(userId int, document webCache.Document
 	return id, nil
 }
 
-func (t *DocumentPostgres) GetAllDocuments(userId int, allDocuments webCache.Filters) ([]webCache.DocumentsResponse, error) {
+func (t *DocumentPostgres) GetAllDocuments(userId int, allDocuments domain.Filters) ([]domain.DocumentsResponse, error) {
 	var args []string
-	var documents []webCache.DocumentsResponse
+	var documents []domain.DocumentsResponse
 
 	if allDocuments.SortByDate {
 		args = append(args, "created_at ASC")
@@ -41,7 +41,7 @@ func (t *DocumentPostgres) GetAllDocuments(userId int, allDocuments webCache.Fil
 		args = append(args, "filename ASC")
 	}
 
-	allDocumentsQuery := fmt.Sprintf("SELECT filename, url, created_at FROM %s WHERE user_id = $1", documentsTable)
+	allDocumentsQuery := "SELECT filename, url, created_at FROM documents WHERE user_id = $1"
 
 	if len(args) > 0 {
 		allDocumentsQuery += " ORDER BY " + strings.Join(args, ", ")
@@ -56,21 +56,19 @@ func (t *DocumentPostgres) GetAllDocuments(userId int, allDocuments webCache.Fil
 		return nil, err
 	}
 
-	fmt.Println(documents)
-
 	return documents, nil
 }
 
-func (t *DocumentPostgres) GetById(userId, documentId int) (webCache.Document, error) {
-	var list webCache.Document
+func (t *DocumentPostgres) GetDocumentById(userId, documentId int) (domain.Document, error) {
+	var list domain.Document
 
-	getOneList := fmt.Sprintf("SELECT filename, url FROM %s dt WHERE dt.user_id = $1 AND dt.id = $2", documentsTable)
+	getOneList := "SELECT filename, url FROM documents dt WHERE dt.user_id = $1 AND dt.id = $2"
 
 	if err := t.db.Get(&list, getOneList, userId, documentId); err != nil {
-		return webCache.Document{}, err
+		return domain.Document{}, err
 	}
 
-	if (list == webCache.Document{}) {
+	if (list == domain.Document{}) {
 		return list, sql.ErrNoRows
 	}
 
@@ -78,7 +76,7 @@ func (t *DocumentPostgres) GetById(userId, documentId int) (webCache.Document, e
 }
 
 func (t *DocumentPostgres) DeleteDocument(userId, documentId int) error {
-	query := fmt.Sprintf("DELETE FROM %s dt WHERE  $1 = dt.user_id AND dt.id = $2", documentsTable)
+	query := "DELETE FROM documents dt WHERE  $1 = dt.user_id AND dt.id = $2"
 
 	result, err := t.db.Exec(query, userId, documentId)
 	if err != nil {

@@ -1,10 +1,7 @@
 package repository
 
 import (
-	"fmt"
-
-	webCache "web-cache/internal/domain"
-
+	"github.com/Dolald/testwork_astral/internal/domain"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -16,10 +13,10 @@ func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
 	return &AuthPostgres{db: db}
 }
 
-func (r *AuthPostgres) CreateUser(user webCache.User) (int, error) {
+func (r *AuthPostgres) CreateUser(user domain.User) (int, error) {
 	var id int
 
-	query := fmt.Sprintf("INSERT INTO %s (login, password_hash) values ($1, $2) RETURNING id", usersTable)
+	query := "INSERT INTO users (login, password_hash) values ($1, $2) RETURNING id"
 	row := r.db.QueryRow(query, user.Login, user.Password)
 
 	if err := row.Scan(&id); err != nil {
@@ -28,10 +25,10 @@ func (r *AuthPostgres) CreateUser(user webCache.User) (int, error) {
 	return id, nil
 }
 
-func (r *AuthPostgres) GetUser(login, password string) (webCache.User, error) {
-	var user webCache.User
+func (r *AuthPostgres) GetUser(login, password string) (domain.User, error) {
+	var user domain.User
 
-	query := fmt.Sprintf("SELECT id FROM %s WHERE login=$1 AND password_hash=$2", usersTable)
+	query := "SELECT id FROM users WHERE login=$1 AND password_hash=$2"
 	err := r.db.Get(&user, query, login, password)
 
 	return user, err

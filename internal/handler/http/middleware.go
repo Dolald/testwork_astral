@@ -6,16 +6,12 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/Dolald/testwork_astral/configs"
 	"github.com/gin-gonic/gin"
 )
 
-const (
-	authorizationHeader = "Authorization"
-	userCtx             = "userId"
-)
-
 func (h *Handler) userIdentify(c *gin.Context) {
-	header := c.GetHeader(authorizationHeader)
+	header := c.GetHeader(configs.AuthorizationHeader)
 	if header == "" {
 		newErrorResponse(c, http.StatusUnauthorized, "empty auth header")
 		return
@@ -31,11 +27,11 @@ func (h *Handler) userIdentify(c *gin.Context) {
 		newErrorResponse(c, http.StatusUnauthorized, err.Error())
 	}
 
-	c.Set(userCtx, userId)
+	c.Set(configs.UserCtx, userId)
 }
 
 func getUserId(c *gin.Context) (int, error) {
-	id, ok := c.Get(userCtx)
+	id, ok := c.Get(configs.UserCtx)
 	if !ok {
 		newErrorResponse(c, http.StatusInternalServerError, "user id is not found")
 		return 0, errors.New("user id is not found")
