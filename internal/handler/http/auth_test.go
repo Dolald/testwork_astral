@@ -72,7 +72,9 @@ func TestSignUp(t *testing.T) {
 			test.mockBehavior(repo, test.inputUser)
 
 			services := &service.Service{Authorization: repo}
-			handler := Handler{services}
+			handler := Handler{
+				service: services,
+			}
 
 			r := gin.New()
 			r.POST("/sign-up", handler.signUp)

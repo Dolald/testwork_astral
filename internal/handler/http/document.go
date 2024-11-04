@@ -8,25 +8,26 @@ import (
 
 	"github.com/Dolald/testwork_astral/configs"
 	"github.com/Dolald/testwork_astral/internal/domain"
+	"github.com/Dolald/testwork_astral/internal/models"
 	"github.com/gin-gonic/gin"
 )
 
 func (h *Handler) createDocument(c *gin.Context) {
 	err := c.Request.ParseMultipartForm(configs.MaxByteForInputting << 20)
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		h.logger.Errorf("ParseMultipartForm failed: %w", err)
 		return
 	}
 
 	userId, err := getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		h.logger.Errorf("getUserId failed: %w", err)
 		return
 	}
 
 	file, err := c.FormFile(configs.FormName)
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		h.logger.Errorf("FormFile failed: %w", err)
 		return
 	}
 
@@ -41,12 +42,12 @@ func (h *Handler) createDocument(c *gin.Context) {
 
 	documentId, err := h.service.Document.CreateDocument(userId, document)
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		h.logger.Errorf("CreateDocument failed: %w", err)
 		return
 	}
 
 	if err := c.SaveUploadedFile(file, configs.UploaderFolder+file.Filename); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		h.logger.Errorf("SaveUploadedFile failed: %w", err)
 		return
 	}
 
@@ -56,21 +57,21 @@ func (h *Handler) createDocument(c *gin.Context) {
 func (h *Handler) getAllDocuments(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		h.logger.Errorf("getUserId failed: %w", err)
 		return
 	}
 
-	var filteredDocuments domain.Filters
+	var filteredDocuments models.Filters
 
 	err = c.BindJSON(&filteredDocuments)
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		h.logger.Errorf("BindJSON failed: %w", err)
 		return
 	}
 
 	allDocuments, err := h.service.Document.GetAllDocuments(userId, filteredDocuments)
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		h.logger.Errorf("GetAllDocuments failed: %w", err)
 		return
 	}
 
@@ -80,19 +81,19 @@ func (h *Handler) getAllDocuments(c *gin.Context) {
 func (h *Handler) getDocumentById(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		h.logger.Errorf("getUserId failed: %w", err)
 		return
 	}
 
 	documentId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		h.logger.Errorf("strconv.Atoi failed: %w", err)
 		return
 	}
 
 	document, err := h.service.Document.GetDocumentById(userId, documentId)
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		h.logger.Errorf("GetDocumentById failed: %w", err)
 		return
 	}
 
@@ -102,18 +103,19 @@ func (h *Handler) getDocumentById(c *gin.Context) {
 func (h *Handler) deleteDocument(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
+		h.logger.Errorf("getUserId failed: %w", err)
 		return
 	}
 
 	documentId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		h.logger.Errorf("strconv.Atoi failed: %w", err)
 		return
 	}
 
 	err = h.service.Document.DeleteDocument(userId, documentId)
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		h.logger.Errorf("DeleteDocument failed: %w", err)
 		return
 	}
 

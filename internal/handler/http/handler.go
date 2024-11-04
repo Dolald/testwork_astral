@@ -3,10 +3,12 @@ package handler
 import (
 	"github.com/Dolald/testwork_astral/internal/service"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type Handler struct {
 	service *service.Service
+	logger  *logrus.Logger
 }
 
 func NewHandler(services *service.Service) *Handler {
@@ -27,7 +29,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		documents := api.Group("/documents")
 		{
 			documents.POST("/upload", h.createDocument)
-			documents.HEAD("/upload", h.createDocument)
 			documents.GET("/", h.getAllDocuments)
 			documents.GET("/:id", h.getDocumentById)
 			documents.DELETE("/:id", h.deleteDocument)

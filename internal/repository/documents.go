@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/Dolald/testwork_astral/internal/domain"
+	"github.com/Dolald/testwork_astral/internal/models"
+
 	"github.com/jmoiron/sqlx"
 )
 
@@ -23,15 +25,15 @@ func (t *DocumentPostgres) CreateDocument(userId int, document domain.Document) 
 	row := t.db.QueryRow(createListQuery, userId, document.Filename, document.Url)
 	var id int
 	if err := row.Scan(&id); err != nil {
-		return 0, err
+		return 0, fmt.Errorf("id scan failed")
 	}
 
 	return id, nil
 }
 
-func (t *DocumentPostgres) GetAllDocuments(userId int, allDocuments domain.Filters) ([]domain.DocumentsResponse, error) {
+func (t *DocumentPostgres) GetAllDocuments(userId int, allDocuments models.Filters) ([]models.DocumentsResponse, error) {
 	var args []string
-	var documents []domain.DocumentsResponse
+	var documents []models.DocumentsResponse
 
 	if allDocuments.SortByDate {
 		args = append(args, "created_at ASC")
@@ -53,7 +55,7 @@ func (t *DocumentPostgres) GetAllDocuments(userId int, allDocuments domain.Filte
 
 	err := t.db.Select(&documents, allDocumentsQuery, userId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("select failed")
 	}
 
 	return documents, nil
@@ -65,7 +67,7 @@ func (t *DocumentPostgres) GetDocumentById(userId, documentId int) (domain.Docum
 	getOneList := "SELECT filename, url FROM documents dt WHERE dt.user_id = $1 AND dt.id = $2"
 
 	if err := t.db.Get(&list, getOneList, userId, documentId); err != nil {
-		return domain.Document{}, err
+		return domain.Document{}, fmt.Errorf("get failed")
 	}
 
 	if (list == domain.Document{}) {
@@ -80,12 +82,12 @@ func (t *DocumentPostgres) DeleteDocument(userId, documentId int) error {
 
 	result, err := t.db.Exec(query, userId, documentId)
 	if err != nil {
-		return err
+		return fmt.Errorf("exec failed")
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return err
+		return fmt.Errorf("no documents were changed")
 	}
 
 	if rowsAffected == 0 {

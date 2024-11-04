@@ -8,6 +8,7 @@ import (
 
 	"github.com/Dolald/testwork_astral/configs"
 	"github.com/Dolald/testwork_astral/internal/repository"
+
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -17,10 +18,10 @@ type tokenClaims struct {
 }
 
 type AuthService struct {
-	repo repository.Authorization
+	repo repository.User
 }
 
-func NewAuthService(repo repository.Authorization) *AuthService {
+func NewAuthService(repo repository.User) *AuthService {
 	return &AuthService{repo: repo}
 }
 
@@ -34,7 +35,7 @@ func gereratePasswordHash(password string) string {
 func (a *AuthService) GenerateToken(username, password string) (string, error) {
 	userId, err := a.repo.GetUser(username, gereratePasswordHash(password))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("GetUser failed: %w", err)
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
@@ -55,9 +56,8 @@ func (a *AuthService) ParseToken(accessToken string) (int, error) {
 		}
 		return []byte(configs.SigngingKey), nil
 	})
-
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("ParseWithClaims failed: %w", err)
 	}
 
 	claims, ok := token.Claims.(*tokenClaims)

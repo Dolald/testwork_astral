@@ -15,7 +15,7 @@ func TestAuthPostgres_CreateUser(t *testing.T) {
 	}
 	defer db.Close()
 
-	r := NewAuthPostgres(db)
+	r := NewUserPostgres(db)
 
 	tests := []struct {
 		name    string
@@ -74,7 +74,7 @@ func testAuthPostgres_getUser(t *testing.T) {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 	defer db.Close()
-	r := NewAuthPostgres(db)
+	r := NewUserPostgres(db)
 
 	type args struct {
 		username string
