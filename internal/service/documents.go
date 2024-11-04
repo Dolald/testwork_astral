@@ -1,9 +1,9 @@
 package service
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/Dolald/testwork_astral/internal/domain"
 	"github.com/Dolald/testwork_astral/internal/models"
 	"github.com/Dolald/testwork_astral/internal/repository"
 )
@@ -16,8 +16,8 @@ func NewDocumentService(repo repository.Document) *DocumentService {
 	return &DocumentService{repo: repo}
 }
 
-func (t *DocumentService) CreateDocument(userId int, document domain.Document) (int, error) {
-	id, err := t.repo.CreateDocument(userId, document)
+func (t *DocumentService) CreateDocument(ctx context.Context, userId int, document models.Document) (int, error) {
+	id, err := t.repo.CreateDocument(ctx, userId, document)
 	if err != nil {
 		return 0, fmt.Errorf("CreateDocument: %w", err)
 	}
@@ -25,8 +25,8 @@ func (t *DocumentService) CreateDocument(userId int, document domain.Document) (
 	return id, nil
 }
 
-func (t *DocumentService) GetAllDocuments(userId int, filteredDocuments models.Filters) ([]models.DocumentsResponse, error) {
-	documentsList, err := t.repo.GetAllDocuments(userId, filteredDocuments)
+func (t *DocumentService) GetAllDocuments(ctx context.Context, userId int, filteredDocuments models.Filters) ([]models.DocumentsResponse, error) {
+	documentsList, err := t.repo.GetAllDocuments(ctx, userId, filteredDocuments)
 	if err != nil {
 		return nil, fmt.Errorf("GetAllDocuments: %w", err)
 	}
@@ -34,17 +34,17 @@ func (t *DocumentService) GetAllDocuments(userId int, filteredDocuments models.F
 	return documentsList, nil
 }
 
-func (t *DocumentService) GetDocumentById(userId, documentId int) (domain.Document, error) {
-	document, err := t.repo.GetDocumentById(userId, documentId)
+func (t *DocumentService) GetDocumentById(ctx context.Context, userId, documentId int) (models.Document, error) {
+	document, err := t.repo.GetDocumentById(ctx, userId, documentId)
 	if err != nil {
-		return domain.Document{}, fmt.Errorf("GetDocumentById: %w", err)
+		return models.Document{}, fmt.Errorf("GetDocumentById: %w", err)
 	}
 
 	return document, nil
 }
 
-func (t *DocumentService) DeleteDocument(userId, documentId int) error {
-	err := t.repo.DeleteDocument(userId, documentId)
+func (t *DocumentService) DeleteDocument(ctx context.Context, userId, documentId int) error {
+	err := t.repo.DeleteDocument(ctx, userId, documentId)
 	if err != nil {
 		return fmt.Errorf("DeleteDocument: %w", err)
 	}

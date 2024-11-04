@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"crypto/sha1"
 	"errors"
 	"fmt"
@@ -32,8 +33,8 @@ func gereratePasswordHash(password string) string {
 	return fmt.Sprintf("%x", hash.Sum([]byte(configs.Salt)))
 }
 
-func (a *AuthService) GenerateToken(username, password string) (string, error) {
-	userId, err := a.repo.GetUser(username, gereratePasswordHash(password))
+func (a *AuthService) GenerateToken(ctx context.Context, username, password string) (string, error) {
+	userId, err := a.repo.GetUser(ctx, username, gereratePasswordHash(password))
 	if err != nil {
 		return "", fmt.Errorf("GetUser failed: %w", err)
 	}

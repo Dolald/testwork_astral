@@ -1,11 +1,11 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"strings"
 
-	"github.com/Dolald/testwork_astral/internal/domain"
 	"github.com/Dolald/testwork_astral/internal/models"
 
 	"github.com/jmoiron/sqlx"
@@ -19,19 +19,18 @@ func NewDocumentsPostgres(db *sqlx.DB) *DocumentPostgres {
 	return &DocumentPostgres{db: db}
 }
 
-func (t *DocumentPostgres) CreateDocument(userId int, document domain.Document) (int, error) {
-
+func (t *DocumentPostgres) CreateDocument(ctx context.Context, userId int, document models.Document) (int, error) {
 	createListQuery := "INSERT INTO documents (user_id, filename, url) VALUES ($1, $2, $3) RETURNING id"
-	row := t.db.QueryRow(createListQuery, userId, document.Filename, document.Url)
+	row := t.db.QueryRowContext(ctx, createListQuery, userId, document.Filename, document.Url)
 	var id int
 	if err := row.Scan(&id); err != nil {
-		return 0, fmt.Errorf("id scan failed")
+		return 0, fmt.Errorf("id scan failed: %w", err)
 	}
 
 	return id, nil
 }
 
-func (t *DocumentPostgres) GetAllDocuments(userId int, allDocuments models.Filters) ([]models.DocumentsResponse, error) {
+func (t *DocumentPostgres) GetAllDocuments(ctx context.Context, userId int, allDocuments models.Filters) ([]models.DocumentsResponse, error) {
 	var args []string
 	var documents []models.DocumentsResponse
 
@@ -53,41 +52,41 @@ func (t *DocumentPostgres) GetAllDocuments(userId int, allDocuments models.Filte
 		allDocumentsQuery += fmt.Sprintf(" LIMIT %d", allDocuments.LimitDocuments)
 	}
 
-	err := t.db.Select(&documents, allDocumentsQuery, userId)
+	err := t.db.SelectContext(ctx, &documents, allDocumentsQuery, userId)
 	if err != nil {
-		return nil, fmt.Errorf("select failed")
+		return nil, fmt.Errorf("select failed: %w", err)
 	}
 
 	return documents, nil
 }
 
-func (t *DocumentPostgres) GetDocumentById(userId, documentId int) (domain.Document, error) {
-	var list domain.Document
+func (t *DocumentPostgres) GetDocumentById(ctx context.Context, userId, documentId int) (models.Document, error) {
+	var list models.Document
 
 	getOneList := "SELECT filename, url FROM documents dt WHERE dt.user_id = $1 AND dt.id = $2"
 
-	if err := t.db.Get(&list, getOneList, userId, documentId); err != nil {
-		return domain.Document{}, fmt.Errorf("get failed")
+	if err := t.db.GetContext(ctx, &list, getOneList, userId, documentId); err != nil {
+		return models.Document{}, fmt.Errorf("get failed: %w", err)
 	}
 
-	if (list == domain.Document{}) {
+	if (list == models.Document{}) {
 		return list, sql.ErrNoRows
 	}
 
 	return list, nil
 }
 
-func (t *DocumentPostgres) DeleteDocument(userId, documentId int) error {
-	query := "DELETE FROM documents dt WHERE  $1 = dt.user_id AND dt.id = $2"
+func (t *DocumentPostgres) DeleteDocument(ctx context.Context, userId, documentId int) error {
+	query := "DELETE FROM documents dt WHERE $1 = dt.user_id AND dt.id = $2"
 
-	result, err := t.db.Exec(query, userId, documentId)
+	result, err := t.db.ExecContext(ctx, query, userId, documentId)
 	if err != nil {
-		return fmt.Errorf("exec failed")
+		return fmt.Errorf("exec failed: %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("no documents were changed")
+		return fmt.Errorf("no documents were changed: %w", err)
 	}
 
 	if rowsAffected == 0 {

@@ -1,22 +1,23 @@
 package repository
 
 import (
-	"github.com/Dolald/testwork_astral/internal/domain"
+	"context"
+
 	"github.com/Dolald/testwork_astral/internal/models"
 
 	"github.com/jmoiron/sqlx"
 )
 
 type User interface {
-	CreateUser(user domain.User) (int, error)
-	GetUser(username, password string) (domain.User, error)
+	CreateUser(ctx context.Context, user models.User) (int, error)
+	GetUser(ctx context.Context, username, password string) (models.User, error)
 }
 
 type Document interface {
-	CreateDocument(userId int, document domain.Document) (int, error)
-	GetAllDocuments(userId int, filteredDocuments models.Filters) ([]models.DocumentsResponse, error)
-	GetDocumentById(userId, documentId int) (domain.Document, error)
-	DeleteDocument(userId, documentId int) error
+	CreateDocument(ctx context.Context, userId int, document models.Document) (int, error)
+	GetAllDocuments(ctx context.Context, userId int, filteredDocuments models.Filters) ([]models.DocumentsResponse, error)
+	GetDocumentById(ctx context.Context, userId, documentId int) (models.Document, error)
+	DeleteDocument(ctx context.Context, userId, documentId int) error
 }
 
 type Repository struct {

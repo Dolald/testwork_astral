@@ -1,9 +1,10 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/Dolald/testwork_astral/internal/domain"
+	"github.com/Dolald/testwork_astral/internal/models"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -15,25 +16,25 @@ func NewUserPostgres(db *sqlx.DB) *UserPostgres {
 	return &UserPostgres{db: db}
 }
 
-func (r *UserPostgres) CreateUser(user domain.User) (int, error) {
+func (r *UserPostgres) CreateUser(ctx context.Context, user models.User) (int, error) {
 	var id int
 
 	query := "INSERT INTO users (login, password_hash) values ($1, $2) RETURNING id"
-	row := r.db.QueryRow(query, user.Login, user.Password)
+	row := r.db.QueryRowContext(ctx, query, user.Login, user.Password)
 
 	if err := row.Scan(&id); err != nil {
-		return 0, fmt.Errorf("scan failed")
+		return 0, fmt.Errorf("scan failed: %w", err)
 	}
 	return id, nil
 }
 
-func (r *UserPostgres) GetUser(login, password string) (domain.User, error) {
-	var user domain.User
+func (r *UserPostgres) GetUser(ctx context.Context, login, password string) (models.User, error) {
+	var user models.User
 
 	query := "SELECT id FROM users WHERE login=$1 AND password_hash=$2"
-	err := r.db.Get(&user, query, login, password)
+	err := r.db.GetContext(ctx, &user, query, login, password)
 	if err != nil {
-		return domain.User{}, fmt.Errorf("get failed")
+		return models.User{}, fmt.Errorf("get failed: %w", err)
 	}
 
 	return user, nil

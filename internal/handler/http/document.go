@@ -1,13 +1,13 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/Dolald/testwork_astral/configs"
-	"github.com/Dolald/testwork_astral/internal/domain"
 	"github.com/Dolald/testwork_astral/internal/models"
 	"github.com/gin-gonic/gin"
 )
@@ -33,14 +33,17 @@ func (h *Handler) createDocument(c *gin.Context) {
 
 	fileLink := fmt.Sprintf(configs.Url + file.Filename)
 
-	document := domain.Document{
+	document := models.Document{
 		User_id:    userId,
 		Filename:   file.Filename,
 		Url:        fileLink,
 		Created_at: time.Now(),
 	}
 
-	documentId, err := h.service.Document.CreateDocument(userId, document)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
+	defer cancel()
+
+	documentId, err := h.service.Document.CreateDocument(ctx, userId, document)
 	if err != nil {
 		h.logger.Errorf("CreateDocument failed: %w", err)
 		return
@@ -69,7 +72,10 @@ func (h *Handler) getAllDocuments(c *gin.Context) {
 		return
 	}
 
-	allDocuments, err := h.service.Document.GetAllDocuments(userId, filteredDocuments)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
+	defer cancel()
+
+	allDocuments, err := h.service.Document.GetAllDocuments(ctx, userId, filteredDocuments)
 	if err != nil {
 		h.logger.Errorf("GetAllDocuments failed: %w", err)
 		return
@@ -91,7 +97,10 @@ func (h *Handler) getDocumentById(c *gin.Context) {
 		return
 	}
 
-	document, err := h.service.Document.GetDocumentById(userId, documentId)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
+	defer cancel()
+
+	document, err := h.service.Document.GetDocumentById(ctx, userId, documentId)
 	if err != nil {
 		h.logger.Errorf("GetDocumentById failed: %w", err)
 		return
@@ -113,13 +122,16 @@ func (h *Handler) deleteDocument(c *gin.Context) {
 		return
 	}
 
-	err = h.service.Document.DeleteDocument(userId, documentId)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
+	defer cancel()
+
+	err = h.service.Document.DeleteDocument(ctx, userId, documentId)
 	if err != nil {
 		h.logger.Errorf("DeleteDocument failed: %w", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, statusResponse{
-		Status: "ok",
+	c.JSON(http.StatusOK, map[string]string{
+		"asd": "asd",
 	})
 }
